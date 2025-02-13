@@ -9,13 +9,21 @@ app.get('/', (req, res) => {
   res.send('Hola!')
 })
 
-app.post('/login', (req, res) => { })
-app.post('/register', (req, res) => {
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body
+  try {
+    const user = await UserRepositoty.login({ username, password })
+    res.send({ user })
+  } catch (error) {
+    res.status(401).send(error.message)
+  }
+})
+app.post('/register', async (req, res) => {
   const { username, password } = req.body
   console.log(req.body)
 
   try {
-    const id = UserRepositoty.create({ username, password })
+    const id = await UserRepositoty.create({ username, password })
     res.send({ id })
   } catch (error) {
     // normalmente no es buena idea enviar el error del repo | ver video de manejo de errores

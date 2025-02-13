@@ -1,5 +1,10 @@
-import DBLocal from 'db-local'
 import crypto from 'crypto'
+
+import DBLocal from 'db-local'
+import bcrypt from 'bcrypt'
+
+import { SALT_ROUNDS } from './config.js'
+
 const { Schema } = new DBLocal({ path: './db' })
 
 const User = Schema('User', {
@@ -9,29 +14,52 @@ const User = Schema('User', {
 })
 
 export class UserRepositoty {
-  static create({ username, password }) {
-    // 1. validaciones de username (opcional: usar zod) estas validaciones son mucho menos que minimas
-    // pero el fin de esta practica es autenticacion, sesion, jwt y cookies
-    if (typeof username !== 'string') throw new Error('username must be a string')
-    if (username.length < 3) throw new Error('username must be at least 3 characters long')
-
-    if (typeof password !== 'string') throw new Error('password must be a string')
-    if (password.length < 6) throw new Error('password must be at least 6 characters long')
+  static async create({ username, password }) {
+    Validation.username(username)
+    Validation.password(password)
 
     // 2. asegurar que el username no existe
     const user = User.findOne({ username })
     if (user) throw new Error('username already exists')
 
     const id = crypto.randomUUID()
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
 
     User.create({
       _id: id,
       username,
-      password
+      password: hashedPassword
     }).save()
 
     return id
   }
 
-  static login({ username, password }) { }
+  static async login({ username, password }) {
+    Validation.username(username)
+    Validation.password(password)
+
+    const user = User.findOne({ username })
+    if (!user) throw new Error('username does not exist')
+
+    const isValid = await bcrypt.compare(password, user.password)
+    if (!isValid) throw new Error('Password is invalid')
+
+    const { password: _, ...publicUser } = user
+
+    return publicUser
+  }
+}
+
+class Validation {
+  static username(username) {
+    // 1. validaciones de username (opcional: usar zod) estas validaciones son mucho menos que minimas
+    // pero el fin de esta practica es autenticacion, sesion, jwt y cookies
+    if (typeof username !== 'string') throw new Error('username must be a string')
+    if (username.length < 3) throw new Error('username must be at least 3 characters long')
+  }
+
+  static password(password) {
+    if (typeof password !== 'string') throw new Error('password must be a string')
+    if (password.length < 6) throw new Error('password must be at least 6 characters long')
+  }
 }
