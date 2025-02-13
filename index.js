@@ -3,14 +3,18 @@ import { PORT } from './config.js'
 import { UserRepositoty } from './user-repository.js'
 
 const app = express()
+
+app.set('view engine', 'ejs')
+
 app.use(express.json())
 
 app.get('/', (req, res) => {
-  res.send('Hola!')
+  res.render('index')
 })
 
 app.post('/login', async (req, res) => {
   const { username, password } = req.body
+  console.log(req.body)
   try {
     const user = await UserRepositoty.login({ username, password })
     res.send({ user })
@@ -32,7 +36,11 @@ app.post('/register', async (req, res) => {
 })
 app.post('/logout', (req, res) => { })
 
-app.get('/protected', (req, res) => { })
+app.get('/protected', (req, res) => {
+  // todo: if sesion del usuario
+  res.render('protected')
+  // todo: else 401
+})
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)

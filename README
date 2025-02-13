@@ -1,3 +1,4 @@
 1. Dependincia db-local para no desplegar una db y recortar tiempo.
 2. Dependincia bcrypt para proteger la password
 3. Se usa yaak para validar las peticiones localmente, alternativa a postman
+4. EJS manejo de plantillas o view engine para node
