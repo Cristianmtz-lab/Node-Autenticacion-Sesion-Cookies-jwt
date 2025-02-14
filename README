@@ -2,3 +2,5 @@
 2. Dependincia bcrypt para proteger la password
 3. Se usa yaak para validar las peticiones localmente, alternativa a postman
 4. EJS manejo de plantillas o view engine para node
+5. Dependincia para crear token con JWT para node 
+6. Dependincia para express cookie-parser para manejar token de session
